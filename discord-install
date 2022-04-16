@@ -1,0 +1,68 @@
+#!/bin/bash
+
+UID_ROOT=0
+E_NOTROOT=67
+
+if [ "$UID" -ne "$UID_ROOT" ]
+then
+	echo "Permission denied"
+	echo "Failed install"
+	exit $E_NOTROOT
+fi
+
+
+echo "|||---Installing dependencies---|||"
+apt install wget -y 
+
+
+echo "|||---Download app---|||"	
+wget -P $PWD https://discordapp.com/api/download/canary?platform=linux
+
+DOWNLOADED_FILE=`ls | grep 'canary*'`
+echo "Downloaded $DOWNLOADED_FILE" 
+if [ "$DOWNLOADED_FILE" == "" ]
+then 
+	echo "Unknow error"
+	exit -1
+fi
+
+
+echo "|||---Installing discord---|||"
+sudo dpkg -i "$PWD"/"$DOWNLOADED_FILE" 2> log.txt
+
+
+
+while IFS= read -r LINE
+do
+	if [ "$LINE" != "" ] 
+	then
+		echo "|||---Fix error---|||"
+		apt --fix-broken install -y
+		echo "|||---Installing discord---|||"
+		sudo dpkg -i "$PWD"/"$DOWNLOADED_FILE" 2> log.txt
+		
+		while IFS= read -r LINE
+		do
+			if [ "$LINE" != "" ] 
+			then
+				FINISH_MESSAGE="|||---Error installation---|||"
+			fi
+			break
+		done < log.txt
+		
+		if [ "$FINISH_MESSAGE" == "" ]
+		then
+			FINISH_MESSAGE="|||---Installation has been succesfull!---|||"
+		fi
+	fi
+	break
+done < log.txt
+
+
+
+echo $FINISH_MESSAGE
+while IFS= read -r LINE; do echo $LINE; done < log.txt
+
+rm -fR $DOWNLOADED_FILE
+rm log.txt
+
