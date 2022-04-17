@@ -1,0 +1,129 @@
+
+#!/bin/bash
+
+CB_DEFAULTCONF_PATH=/home/christmas/.config/codeblocks/
+
+
+ERR_ENOTDIR=2
+
+
+
+
+###
+## checking the wget util ##
+
+WGET_DEFAULT_PATH=/usr/bin/wget
+
+if [ ! -e  "$WGET_DEFAULT_PATH" ]
+then
+	echo "Directory $WGET_DEFAULT_PATH was not found"
+	echo "You need install wget \"sudo apt install wget -y\""
+	exit $ERR_ENOTDIR
+fi
+
+###
+
+
+###
+## checking the unzip util ##
+
+UNZIP_DEFAULT_PATH=/usr/bin/unzip
+
+if [ ! -e  "$UNZIP_DEFAULT_PATH" ]
+then
+	echo "Directory $UNZIP_DEFAULT_PATH was not found"
+	echo "You need install unzip \"sudo apt install unzip -y\""
+	exit $ERR_ENOTDIR
+fi
+
+###
+
+
+###
+## checking the network connection ##
+
+STATUS=`ping 8.8.8.8 -c 1 -w 1 | grep "1 received"`
+
+if [ "$STATUS" == "" ]
+then
+	echo "No internet connection"
+	exit 0
+fi
+
+###
+
+
+
+###
+## downloading theme archive ##
+
+THEMECONF_URL=https://gist.github.com/yzhong52/6852140faa233408de67/archive/b8c19b115859afa9a6831ffd59f1d2e81985ccca.zip
+
+echo "Downloading themes..."
+wget $THEMECONF_URL 2> log.txt
+
+###
+
+
+
+
+###
+## extracting theme archive ##
+
+LATEST_CHANGE=(`ls -t`)
+
+echo "Extracting themes... "
+unzip "${LATEST_CHANGE[0]}" > log.txt 
+
+###
+
+
+
+
+###
+## сopy themes file to ~/Desktop ##
+## to make it easier to find ##
+
+LATEST_CHANGE=(`ls -tr`)
+
+cp ${LATEST_CHANGE[0]}/`ls ${LATEST_CHANGE[0]}` ~/Desktop/
+
+###
+
+
+
+
+###
+## run cb_share_config ##
+
+echo "Run cb_share_config..."
+cb_share_config 2> log.txt
+
+###
+
+
+
+
+###
+## could not save config file (default.conf) ##
+## fixing this error ## 
+
+chmod ugo+rw $CB_DEFAULTCONF_PATH/`ls $CB_DEFAULTCONF_PATH`
+
+###
+
+
+
+
+###
+## remove all temporary files ##
+
+rm ~/Desktop/`ls ${LATEST_CHANGE[0]}`
+rm -r 68*
+rm b8*
+rm log.txt
+
+###
+
+
+echo "Installation has been successful!"
