@@ -1,0 +1,78 @@
+#!/bin/bash
+
+UID_ROOT=0
+E_NOTROOT=67
+
+if [ "$UID" -ne "$UID_ROOT" ]
+then
+	echo "Permission denied"
+	echo "Failed install"
+	exit $E_NOTROOT
+fi
+
+
+echo "|||---Clonning required repositories---|||"
+git clone https://github.com/lgirdk/poky.git
+cd poky/
+
+# for udoo boards
+git clone https://github.com/Freescale/meta-fsl-ivi.git
+git clone https://github.com/openembedded/meta-openembedded.git
+git clone https://github.com/Freescale/meta-freescale-ml.git
+git clone https://github.com/Freescale/meta-freescale-distro.git
+git clone https://github.com/Freescale/meta-freescale-3rdparty.git
+git clone git://git.openembedded.org/openembedded-core
+git clone git://git.yoctoproject.org/meta-freescale
+
+echo "|||---Installation has been succesfull!---|||"
+
+exit 1
+ 
+echo "|||---Installing dependencies---|||"
+apt install gawk wget git git-core diffstat unzip texinfo gcc-multilib \
+build-essential chrpath socat cpio python python3-pip \
+python3-pexpect xz-utils debianutils iputils-ping libsdl1.2-dev xterm
+
+# for ubuntu 14.04 isntall python3.6
+PYTHON36_DIR="/usr/local/bin/python3.6"
+
+if [ ! -d "$PYTHON36_DIR" ]
+then
+	echo "------download python3.6------"
+	wget https://www.python.org/ftp/python/3.6.3/Python-3.6.3.tgz #> dev/null 2>/dev/null
+	echo "------extract python3.6------"
+	tar -xvf Python-3.6.3.tgz #> /dev/null 2>/dev/null
+	cd Python-3.6.3
+	./configure --enable-optimizations #> /dev/null 2>/dev/null
+	echo "------make python3.6------"	
+	make -j8 #> /dev/null 2>/dev/null
+	echo "------install python3.6------"
+	make install #> /dev/null 2>/dev/null
+fi
+
+PYTHON36_SYMBOLIC_LINK="/usr/bin/python3"
+if [ ! -h "$PYTHON36_SYMBOLIC_LINK" ]
+then
+	# creat symbolic link  /usr/bin/python3 on /usr/bin/python3.6
+	echo "------creat symbolic link python3.6------"
+	ln -s /usr/local/bin/python3.6 $PYTHON36_SYMBOLIC_LINK
+fi
+
+
+echo "|||---Clonning required repositories---|||"
+git clone https://github.com/lgirdk/poky.git
+cd poky/
+
+# for udoo boards
+git clone https://github.com/Freescale/meta-fsl-ivi.git
+git clone https://github.com/openembedded/meta-openembedded.git
+git clone https://github.com/Freescale/meta-freescale-ml.git
+git clone https://github.com/Freescale/meta-freescale-distro.git
+git clone https://github.com/Freescale/meta-freescale-3rdparty.git
+git clone git://git.openembedded.org/openembedded-core
+git clone git://git.yoctoproject.org/meta-freescale
+
+echo "|||---Installation has been succesfull!---|||"
+
+
+
